@@ -83,10 +83,18 @@ class SendDailyStatistics extends Command
 
                 // Отмечаем отправленным только после успешной передачи
                 // письма выбранному почтовому драйверу.
-                DailyReportDelivery::query()->updateOrCreate(
-                    ['moderator_id' => $moderator->id, 'report_date' => $dateString],
-                    ['sent_at' => now()]
-                );
+                if ($alreadySent) {
+                    DailyReportDelivery::query()
+                        ->where('moderator_id', $moderator->id)
+                        ->whereDate('report_date', $dateString)
+                        ->update(['sent_at' => now()]);
+                } else {
+                    DailyReportDelivery::query()->create([
+                        'moderator_id' => $moderator->id,
+                        'report_date' => $dateString,
+                        'sent_at' => now(),
+                    ]);
+                }
                 $sent++;
             } catch (\Throwable $exception) {
                 report($exception);
