@@ -1,0 +1,22 @@
+RewriteEngine On
+
+# Deny HTTP access to Laravel source, dependencies and writable storage.
+RewriteRule ^(?:app|bootstrap|config|database|resources|routes|storage|tests|vendor)(?:/|$) - [F,L,NC]
+
+# Never serve secrets and project configuration through the web.
+RewriteRule ^(?:\.env(?:\..*)?|artisan|composer\.(?:json|lock)|phpunit\.xml|README(?:\.md)?|HOSTING_[^/]*|PRIVATE_TEST\.txt|package(?:-lock)?\.json|vite\.config\.js)$ - [F,L,NC]
+RewriteRule ^\.(?!well-known(?:/|$)) - [F,L,NC]
+
+# Route app requests to the htdocs front controller; do not expose other PHP entry points.
+RewriteRule ^(?!index\.php$|public/)[^/]+\.php$ - [F,L,NC]
+RewriteRule ^index\.php$ - [L]
+RewriteRule ^public(?:/|$) - [L]
+
+# CSS, JS, fonts and images still live in Laravel's public folder.
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(.+)$ public/$1 [L]
+
+# Laravel route (e.g. /login, /news, /account): dispatch without redirect.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
