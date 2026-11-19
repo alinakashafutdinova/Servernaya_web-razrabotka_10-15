@@ -6,21 +6,36 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  tests:
+    name: Laravel + Vue/Vite + Pusher
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo, curl
           tools: composer:v2
           coverage: none
-      - name: Install Composer dependencies
+      - name: Install PHP dependencies (including Pusher SDK)
         run: composer install --no-interaction --prefer-dist --no-progress
-      - name: Prepare test environment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Vue, Echo, Pusher JS and Vite
+        run: npm install --no-audit --no-fund
+      - name: Compile production assets
+        run: |
+          npm run build
+          test -s public/build/manifest.json
+      - name: Create test environment
         run: cp .env.example .env
-      - name: Run feature tests
+      - name: Run Laravel tests (including queue and events)
+        env:
+          BROADCAST_CONNECTION: log
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          MAIL_MAILER: array
         run: php artisan test --display-warnings
       - name: Check routes
         env:
@@ -30,34 +45,85 @@ jobs:
         run: php artisan route:list
 
   local-ready-zip:
+    name: Архив преподавателю — SQLite, vendor и Vue
     if: github.ref == 'refs/heads/main'
-    name: Архив для преподавателя — SQLite + vendor
-    needs: test
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo, curl
           tools: composer:v2
           coverage: none
-      - name: Install all dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
-      - name: Check automatic setup
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build JS/CSS
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Test automated local setup
         run: |
           php scripts/setup-local.php
           test -f database/database.sqlite
-          test -f LOCAL_LOGIN.txt
-          php artisan route:list
-      - name: Assemble clean ZIP
+          test -s LOCAL_LOGIN.txt
+      - name: Package working Laravel site
         run: |
-          mkdir -p /tmp/laravel-delivery/Kursovaya_10-15_SQLite
-          rsync -a             --exclude='.git/'             --exclude='.github/'             --exclude='.env'             --exclude='LOCAL_LOGIN.txt'             --exclude='database/*.sqlite'             --exclude='storage/logs/*.log'             --exclude='.phpunit.result.cache'             --exclude='bootstrap/cache/*.php'             ./ /tmp/laravel-delivery/Kursovaya_10-15_SQLite/
-          cd /tmp/laravel-delivery
-          zip -qr "$GITHUB_WORKSPACE/Kursovaya_10-15_SQLite_ready.zip" Kursovaya_10-15_SQLite
+          mkdir -p /tmp/delivery/Servernaya_10-15_Local
+          rsync -a ./ /tmp/delivery/Servernaya_10-15_Local/ \
+            --exclude='.git/' --exclude='.github/' --exclude='.env' \
+            --exclude='LOCAL_LOGIN.txt' --exclude='database/*.sqlite' \
+            --exclude='storage/logs/*.log' --exclude='node_modules/' \
+            --exclude='.phpunit.result.cache' --exclude='bootstrap/cache/*.php'
+          cd /tmp/delivery
+          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_LR11.zip" Servernaya_10-15_Local
+          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_LR11.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: Kursovaya_10-15_SQLite_готовый_проект
-          path: Kursovaya_10-15_SQLite_ready.zip
+          name: LR11_Local_SQLite_Laravel13_Vue
+          path: Servernaya_10-15_SQLite_LR11.zip
+          retention-days: 30
+
+  infinityfree-ready-zip:
+    name: Архив InfinityFree — MySQL, vendor и собранный JS
+    if: github.ref == 'refs/heads/hosting-laravel13'
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo, curl
+          tools: composer:v2
+          coverage: none
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build production JS/CSS
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -s public/build/manifest.json
+      - name: Package hosting deployment without secrets
+        run: |
+          mkdir -p /tmp/delivery/Servernaya_10-15_InfinityFree
+          rsync -a ./ /tmp/delivery/Servernaya_10-15_InfinityFree/ \
+            --exclude='.git/' --exclude='.github/' --exclude='.env' \
+            --exclude='node_modules/' --exclude='database/*.sqlite' \
+            --exclude='LOCAL_LOGIN.txt' --exclude='storage/logs/*.log' \
+            --exclude='tests/' --exclude='.phpunit.result.cache' \
+            --exclude='bootstrap/cache/*.php'
+          cd /tmp/delivery
+          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_LR11.zip" Servernaya_10-15_InfinityFree
+          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_LR11.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LR11_InfinityFree_MySQL_Laravel13_Vue
+          path: Servernaya_10-15_InfinityFree_LR11.zip
           retention-days: 30
