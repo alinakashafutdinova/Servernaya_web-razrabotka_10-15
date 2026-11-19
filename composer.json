@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "alina/servernaya-web-razrabotka",
-    "description": "Лабораторные работы №1–9 по серверной веб-разработке",
+    "description": "Курсовой проект №10–15 по серверной веб-разработке",
     "type": "project",
     "license": "MIT",
     "require": {

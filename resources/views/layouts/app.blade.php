@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#fffafc">
-    <meta name="description" content="Лабораторные работы №1–9 по серверной веб-разработке: статьи, авторизация, комментарии и модерация.">
+    <meta name="description" content="Курсовой проект · №10–15 по серверной веб-разработке: статьи, авторизация, комментарии и модерация.">
     <title>@yield('title') — Алина Кашафутдинова</title>
     <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=20261119b">
 </head>
@@ -27,7 +27,7 @@
                             <button type="submit" class="header-logout">Выйти <span aria-hidden="true">↗</span></button>
                         </form>
                     @else
-                        <span class="header-note">ЛАБОРАТОРНЫЕ №1–9</span>
+                        <span class="header-note">КУРСОВОЙ ПРОЕКТ №10–15</span>
                         <a class="header-login" href="{{ route('login') }}">Войти</a>
                         <a class="header-register" href="{{ route('register') }}">Регистрация</a>
                     @endauth
@@ -68,7 +68,7 @@
                     <span class="footer-separator">/</span>
                     <span>Группа 257-321</span>
                 </div>
-                <span class="footer-course">Серверная веб-разработка · Лабораторные работы №1–9</span>
+                <span class="footer-course">Серверная веб-разработка · Курсовой проект · №10–15</span>
             </div>
         </footer>
     </div>

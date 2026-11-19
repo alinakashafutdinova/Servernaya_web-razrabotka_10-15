@@ -1,0 +1,28 @@
+name: Проверка курсового проекта №10–15
+
+on:
+  push:
+    branches: [main, hosting-laravel13]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo
+          tools: composer:v2
+          coverage: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Run feature tests
+        run: php artisan test
+      - name: Check routes
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan route:list
