@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Jobs\VeryLongJob;
+use App\Events\NewArticleEvent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -67,6 +68,11 @@ class NewsController extends Controller
                 ->with('status', 'Статья сохранена, но поставить уведомление в очередь не удалось. Проверьте журнал ошибок.');
         }
 
+        // Событие публично: не показываем посетителям черновики.
+        if ($article->is_published) {
+            NewArticleEvent::dispatch($article->id, $article->title);
+        }
+
         $message = config('queue.default') === 'database'
             ? 'Статья сохранена. Уведомление поставлено в очередь.'
             : 'Статья сохранена. Задание по отправке письма выполнено.';
@@ -83,9 +89,16 @@ class NewsController extends Controller
     public function update(ArticleRequest $request, Article $article): RedirectResponse
     {
         $this->authorize('update', $article);
+        $wasPublished = $article->is_published;
         $data = $request->validated();
         $data['is_published'] = $request->boolean('is_published');
         $article->update($data);
+
+        // Публикация ранее скрытого черновика тоже является новой статьёй для читателя.
+        if (! $wasPublished && $article->is_published) {
+            NewArticleEvent::dispatch($article->id, $article->title);
+        }
+
         return redirect()->route('news.manage')->with('status', 'Изменения сохранены.');
     }
 
