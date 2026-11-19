@@ -7,13 +7,16 @@
     <meta name="description" content="Курсовой проект · №10–15 по серверной веб-разработке: статьи, авторизация, комментарии и модерация.">
     <title>@yield('title') — Алина Кашафутдинова</title>
     <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=20261119b">
-    <script>
-        // Публичные параметры Pusher (APP_SECRET сюда НЕ передаётся).
-        window.__BROADCAST_PUBLIC__ = @json([
+    @php
+        $broadcastPublic = [
             'enabled' => config('broadcasting.default') === 'pusher',
             'key' => config('broadcasting.connections.pusher.key'),
             'cluster' => config('broadcasting.connections.pusher.options.cluster'),
-        ]);
+        ];
+    @endphp
+    <script>
+        // Публикуем только ключ и кластер. Pusher App Secret остаётся на сервере.
+        window.__BROADCAST_PUBLIC__ = {{ \Illuminate\Support\Js::from($broadcastPublic) }};
     </script>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
