@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="660" viewBox="0 0 760 660" fill="none" role="img" aria-labelledby="t d">
+<title id="t">Иллюстрация веб-страницы</title><desc id="d">Макет окна браузера, карточки и элементы интерфейса с розовыми акцентами.</desc>
+<defs>
+  <linearGradient id="bg" x1="10" y1="0" x2="745" y2="660" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF0F5"/><stop offset="1" stop-color="#F6E4F2"/></linearGradient>
+  <linearGradient id="pane" x1="175" y1="260" x2="570" y2="560" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF"/><stop offset="1" stop-color="#FFFAFC"/></linearGradient>
+  <filter id="shadow" x="68" y="56" width="646" height="600" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="760" height="660" rx="38" fill="url(#bg)"/>
+<circle cx="690" cy="65" r="132" stroke="#F6BDD2" stroke-width="2"/><circle cx="85" cy="599" r="145" stroke="#F5C6D9" stroke-width="2"/>
+<circle cx="651" cy="533" r="28" fill="#FFB7CE" opacity=".5"/><circle cx="91" cy="139" r="17" fill="#F84D92" opacity=".3"/>
+<g opacity=".2" filter="url(#shadow)"><rect x="114" y="111" width="530" height="429" rx="28" fill="#A06F8A"/></g>
+<rect x="104" y="107" width="538" height="430" rx="25" fill="#FFF" stroke="#F4CFDC" stroke-width="2"/>
+<path d="M129 107h488a25 25 0 0 1 25 25v44H104v-44a25 25 0 0 1 25-25Z" fill="#FBEAF0"/>
+<circle cx="140" cy="141" r="8" fill="#FA4D92"/><circle cx="165" cy="141" r="8" fill="#E7ABCA"/><circle cx="190" cy="141" r="8" fill="#E7ABCA"/>
+<rect x="254" y="130" width="288" height="23" rx="11.5" fill="#FFF8FB"/>
+<rect x="142" y="211" width="184" height="14" rx="7" fill="#F6BFDA"/><rect x="142" y="247" width="347" height="22" rx="11" fill="#362733"/>
+<rect x="142" y="283" width="290" height="22" rx="11" fill="#362733"/>
+<rect x="142" y="329" width="349" height="9" rx="4.5" fill="#E4D5DD"/><rect x="142" y="350" width="315" height="9" rx="4.5" fill="#E4D5DD"/><rect x="142" y="371" width="333" height="9" rx="4.5" fill="#E4D5DD"/>
+<rect x="142" y="416" width="118" height="40" rx="14" fill="#FA4D92"/><path d="m231 436 8 0m-4-4 4 4-4 4" stroke="white" stroke-linecap="round" stroke-width="2"/>
+<rect x="521" y="219" width="83" height="83" rx="23" fill="#FFF0F5"/><path d="m543 260 13-13m-13 13 13 13m25-26 13 13-13 13" stroke="#E34786" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="417" y="446" width="187" height="62" rx="18" fill="#FFF8FB" stroke="#F5D8E3"/><circle cx="448" cy="477" r="15" fill="#FBC9DD"/><rect x="476" y="466" width="91" height="9" rx="4.5" fill="#B88BA1"/><rect x="476" y="485" width="63" height="7" rx="3.5" fill="#E7C9D8"/>
+<rect x="459" y="91" width="129" height="40" rx="20" fill="#FA4D92"/><text x="523.5" y="116" font-family="Arial,sans-serif" font-weight="700" font-size="16" text-anchor="middle" fill="#FFF">WEB NOTES</text>
+<path d="m89 496 17 0m-8-8 8 8-8 8" stroke="#E76599" stroke-width="4" stroke-linecap="round"/>
+</svg>
