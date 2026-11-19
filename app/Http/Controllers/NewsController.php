@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
-use App\Mail\ArticleCreatedMail;
-use App\Models\Role;
-use App\Models\User;
-use Illuminate\Support\Facades\Mail;
+use App\Jobs\VeryLongJob;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -62,21 +59,19 @@ class NewsController extends Controller
         $article = Article::create($data);
 
         try {
-            $moderators = User::query()
-                ->whereHas('role', fn ($query) => $query->where('slug', Role::MODERATOR))
-                ->get();
-
-            foreach ($moderators as $moderator) {
-                Mail::to($moderator->email)->send(new ArticleCreatedMail($article));
-            }
+            VeryLongJob::dispatch($article->id);
         } catch (\Throwable $exception) {
             report($exception);
 
             return redirect()->route('news.manage')
-                ->with('status', 'Статья сохранена, но уведомление не отправлено. Проверьте настройки почты.');
+                ->with('status', 'Статья сохранена, но поставить уведомление в очередь не удалось. Проверьте журнал ошибок.');
         }
 
-        return redirect()->route('news.manage')->with('status', 'Статья успешно добавлена.');
+        $message = config('queue.default') === 'database'
+            ? 'Статья сохранена. Уведомление поставлено в очередь.'
+            : 'Статья сохранена. Задание по отправке письма выполнено.';
+
+        return redirect()->route('news.manage')->with('status', $message);
     }
 
     public function edit(Article $article): View
