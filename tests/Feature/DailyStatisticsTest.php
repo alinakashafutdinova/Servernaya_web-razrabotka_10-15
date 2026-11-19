@@ -171,7 +171,13 @@ class DailyStatisticsTest extends TestCase
 
         $this->assertSame(0, Artisan::call('schedule:list'));
         $this->assertStringContainsString('stats:daily', Artisan::output());
-        $this->assertStringContainsString('* * * * *', Artisan::output());
+        // Проверяем именно cron-выражение, а не форматированный вывод CLI.
+        $events = app(\Illuminate\Console\Scheduling\Schedule::class)->events();
+        $daily = collect($events)->first(
+            static fn ($event): bool => str_contains($event->command ?? '', 'stats:daily')
+        );
+        $this->assertNotNull($daily);
+        $this->assertSame('* * * * *', $daily->expression);
 
         $html = (new DailyStatisticsMail('2026-11-19', 14, 3))->render();
         $this->assertStringContainsString('19', $html);
