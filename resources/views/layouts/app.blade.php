@@ -68,7 +68,7 @@
                         @endphp
                         <details class="readers-notifications">
                             <summary class="nav-link readers-notifications__trigger">
-                                <span aria-hidden="true">♧</span> Уведомления
+                                <span aria-hidden="true">🔔</span> Уведомления
                                 @if ($unreadCount > 0)
                                     <span class="notice-count" aria-label="Непрочитанных уведомлений: {{ $unreadCount }}">{{ $unreadCount }}</span>
                                 @endif
