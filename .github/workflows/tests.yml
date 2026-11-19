@@ -43,6 +43,15 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: php artisan route:list
+      - name: Validate REST API routes and Postman collection
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: |
+          python3 -m json.tool docs/postman/LR15_REST_API.postman_collection.json > /dev/null
+          php artisan route:list --path=api --json > /tmp/lr15-routes.json
+          php -r '$routes=json_decode(file_get_contents("/tmp/lr15-routes.json"),true); $uris=array_column($routes,"uri"); foreach(["api/register","api/login","api/articles","api/articles/{article}","api/logout"] as $p) { if (!in_array($p,$uris,true)) { fwrite(STDERR,"Missing route: ".$p.PHP_EOL); exit(1); } } echo "REST API routes: ".count($routes).PHP_EOL;'
 
   local-ready-zip:
     name: Архив преподавателю — SQLite, vendor и Vue
