@@ -1,0 +1,41 @@
+/* ЛР №11: уведомление о новой статье, обособлено от прежнего дизайна. */
+.broadcast-toast {
+    position: fixed;
+    z-index: 9999;
+    right: clamp(16px, 3vw, 40px);
+    bottom: clamp(16px, 3vw, 40px);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: min(410px, calc(100vw - 32px));
+    padding: 22px 20px;
+    border: 1px solid #f3bfd4;
+    border-radius: 20px;
+    background: #fffafc;
+    color: #29202a;
+    box-shadow: 0 14px 45px rgba(115, 33, 72, .18);
+    font-family: inherit;
+}
+.broadcast-toast__icon {
+    flex: 0 0 40px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #ffe4f0;
+    color: #cf4b85;
+    font-size: 25px;
+}
+.broadcast-toast__body { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 7px; }
+.broadcast-toast__eyebrow { font-size: 10px; letter-spacing: .13em; font-weight: 800; color: #b95b83; }
+.broadcast-toast__body strong { font-size: 16px; line-height: 1.3; }
+.broadcast-toast__link { color: #a72f69; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
+.broadcast-toast__link:hover { text-decoration: underline; }
+.broadcast-toast__close { border: 0; background: transparent; color: #9b7c8a; font-size: 28px; cursor: pointer; padding: 0 3px; line-height: 1; }
+.broadcast-toast__close:focus-visible, .broadcast-toast__link:focus-visible { outline: 2px solid #af4c82; outline-offset: 3px; }
+.broadcast-pop-enter-active, .broadcast-pop-leave-active { transition: opacity .2s ease, transform .2s ease; }
+.broadcast-pop-enter-from, .broadcast-pop-leave-to { opacity: 0; transform: translateY(15px); }
+@media (prefers-reduced-motion: reduce) {
+    .broadcast-pop-enter-active, .broadcast-pop-leave-active { transition: none; }
+}
