@@ -43,6 +43,15 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: php artisan route:list
+      - name: Validate REST API routes and Postman collection
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: |
+          python3 -m json.tool docs/postman/LR15_REST_API.postman_collection.json > /dev/null
+          php artisan route:list --path=api --json > /tmp/lr15-routes.json
+          php -r '$routes=json_decode(file_get_contents("/tmp/lr15-routes.json"),true); $uris=array_column($routes,"uri"); foreach(["api/register","api/login","api/articles","api/articles/{article}","api/logout"] as $p) { if (!in_array($p,$uris,true)) { fwrite(STDERR,"Missing route: ".$p.PHP_EOL); exit(1); } } echo "REST API routes: ".count($routes).PHP_EOL;'
 
   local-ready-zip:
     name: Архив преподавателю — SQLite, vendor и Vue
@@ -76,6 +85,24 @@ jobs:
           php artisan schedule:run
           php -r '$db = new PDO("sqlite:database/database.sqlite"); $count = (int) $db->query("SELECT COUNT(*) FROM daily_report_deliveries")->fetchColumn(); if ($count < 1) { fwrite(STDERR, "Schedule did not send and record daily email.\\n"); exit(1); }'
           test -s storage/logs/laravel.log
+      - name: End-to-end HTTP smoke test (Postman-equivalent)
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8015 > /tmp/lr15-serve.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in $(seq 1 25); do
+            if curl --silent --fail http://127.0.0.1:8015/api/articles > /tmp/lr15-articles.json; then READY=1; break; fi
+            sleep 1
+          done
+          test "$READY" = "1"
+          php -r '$json=json_decode(file_get_contents("/tmp/lr15-articles.json"),true); if (!is_array($json) || !isset($json["data"],$json["meta"])) exit(1); echo "GET /api/articles OK".PHP_EOL;'
+          STATUS=$(curl --silent --output /tmp/lr15-unauthorized.json --write-out '%{http_code}' --header 'Accept: application/json' http://127.0.0.1:8015/api/user)
+          test "$STATUS" = "401"
+          php -r '$json=json_decode(file_get_contents("/tmp/lr15-unauthorized.json"),true); if (!is_array($json) || !isset($json["message"])) exit(1); echo "GET /api/user -> 401 JSON OK".PHP_EOL;'
+          STATUS=$(curl --silent --output /tmp/lr15-validate.json --write-out '%{http_code}' --header 'Accept: application/json' --header 'Content-Type: application/json' --data '{"email":"invalid","password":"short"}' http://127.0.0.1:8015/api/register)
+          test "$STATUS" = "422"
+          php -r '$json=json_decode(file_get_contents("/tmp/lr15-validate.json"),true); if (!is_array($json) || !isset($json["errors"])) exit(1); echo "POST /api/register -> 422 JSON OK".PHP_EOL;'
       - name: Package working Laravel site
         run: |
           mkdir -p /tmp/delivery/Servernaya_10-15_Local
