@@ -18,8 +18,10 @@ jobs:
           coverage: none
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare test environment
+        run: cp .env.example .env
       - name: Run feature tests
-        run: php artisan test
+        run: php artisan test --display-warnings
       - name: Check routes
         env:
           APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
