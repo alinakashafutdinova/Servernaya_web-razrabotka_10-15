@@ -63,6 +63,11 @@ if ($isNew) {
  // ЛР №13: обновляем кеш и для существующего .env после №10–12.
 $env = localSetEnv($env, 'CACHE_DRIVER', 'database');
 $env = localSetEnv($env, 'CACHE_STORE', 'database');
+// Для существующего .env из предыдущих лабораторных добавляем настройку
+// демонстрационного расписания, не затрагивая SMTP и пароли.
+if (localEnvValue($env, 'DAILY_REPORT_DEMO_EVERY_MINUTE') === null) {
+    $env = localSetEnv($env, 'DAILY_REPORT_DEMO_EVERY_MINUTE', 'true');
+}
 if (localEnvValue($env, 'QUEUE_CONNECTION') !== 'database') {
     stopLocal('В локальной версии ЛР №10 требуется QUEUE_CONNECTION=database.');
 }

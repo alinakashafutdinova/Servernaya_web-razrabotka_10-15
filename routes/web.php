@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\DailyStatisticsController;
 use App\Http\Controllers\UserSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/account/notifications/{notification}/open', [AccountController::class, 'openArticleNotification'])
         ->whereUuid('notification')->name('account.notifications.open');
     Route::get('/management', [NewsController::class, 'manage'])->name('news.manage');
+    Route::post('/management/daily-statistics', [DailyStatisticsController::class, 'send'])
+        ->middleware('throttle:2,1')->name('reports.daily.send');
     Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
     Route::post('/news', [NewsController::class, 'store'])->name('news.store');
     Route::get('/news/{article}/edit', [NewsController::class, 'edit'])->whereNumber('article')->name('news.edit');
@@ -69,4 +72,4 @@ Route::middleware('auth:sanctum')->group(function () {
         ->whereNumber('article')->name('comments.store');
 });
 
-Route::get('/news/{article}', [NewsController::class, 'show'])->whereNumber('article')->name('news.show');
+Route::get('/news/{article}', [NewsController::class, 'show'])->whereNumber('article')->middleware('article.view')->name('news.show');

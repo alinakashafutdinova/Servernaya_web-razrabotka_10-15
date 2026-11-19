@@ -13,6 +13,14 @@
         <a class="button button-primary" href="{{ route('news.create') }}">+ Новая статья</a>
     </div>
 
+    <form method="post" action="{{ route('reports.daily.send') }}" class="admin-report-form">
+        @csrf
+        <button type="submit" class="button button-secondary">
+            Отправить статистику за сегодня ✉
+        </button>
+        <p>ЛР №14 · просмотры новостей и новые комментарии за день. Повторная рассылка за сегодня пропускается.</p>
+    </form>
+
     @if (session('status'))
         <div class="admin-notice" role="status">{{ session('status') }}</div>
     @endif

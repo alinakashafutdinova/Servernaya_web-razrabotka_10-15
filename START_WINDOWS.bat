@@ -23,6 +23,7 @@ if errorlevel 1 (
   exit /b 1
 )
 start "Laravel Queue Worker" cmd /k "php artisan queue:work database --tries=3 --sleep=1"
+start "Laravel Daily Scheduler" cmd /k "php artisan schedule:work"
 echo Open http://127.0.0.1:8000
 php artisan serve --host=127.0.0.1 --port=8000
 pause
