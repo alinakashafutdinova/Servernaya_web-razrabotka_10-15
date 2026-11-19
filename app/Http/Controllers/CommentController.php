@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Comment;
 use App\Notifications\CommentModeratedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,6 +28,7 @@ class CommentController extends Controller
             'user_id' => $request->user()->id,
             'body' => $data['body'],
         ]);
+        Cache::forget("news.show.{$article->id}");
 
         return redirect()->route('news.show', $article)->with('status', 'Комментарий отправлен и ожидает модерации.');
     }
@@ -55,6 +57,8 @@ class CommentController extends Controller
                 true, $comment->article_id, $comment->article->title, $comment->body
             ));
         });
+        // Новые одобренные комментарии должны появляться сразу.
+        Cache::forget("news.show.{$comment->article_id}");
 
         return redirect()->route('comments.moderation')->with('status', 'Комментарий опубликован. Автор получил уведомление в своём профиле.');
     }
@@ -69,6 +73,7 @@ class CommentController extends Controller
             ));
             $comment->delete();
         });
+        Cache::forget("news.show.{$comment->article_id}");
 
         return redirect()->route('comments.moderation')->with('status', 'Комментарий отклонён и удалён. Автор получил уведомление в своём профиле.');
     }
