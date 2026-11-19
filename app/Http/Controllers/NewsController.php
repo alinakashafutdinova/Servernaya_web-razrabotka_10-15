@@ -59,18 +59,29 @@ class NewsController extends Controller
         $data['is_published'] = $request->boolean('is_published');
         $article = Article::create($data);
 
+        $mailQueued = true;
+
         try {
             VeryLongJob::dispatch($article->id);
         } catch (\Throwable $exception) {
             report($exception);
-
-            return redirect()->route('news.manage')
-                ->with('status', 'Статья сохранена, но поставить уведомление в очередь не удалось. Проверьте журнал ошибок.');
+            $mailQueued = false;
         }
 
+        // Онлайн-оповещение не зависит от успеха отправки электронного письма.
         // Событие публично: не показываем посетителям черновики.
         if ($article->is_published) {
-            NewArticleEvent::dispatch($article->id, $article->title);
+            try {
+                NewArticleEvent::dispatch($article->id, $article->title);
+            } catch (\Throwable $exception) {
+                // Не теряем опубликованную статью при сбое внешнего сервиса.
+                report($exception);
+            }
+        }
+
+        if (! $mailQueued) {
+            return redirect()->route('news.manage')
+                ->with('status', 'Статья сохранена, но почтовое уведомление не отправлено. Проверьте настройки почты.');
         }
 
         $message = config('queue.default') === 'database'
