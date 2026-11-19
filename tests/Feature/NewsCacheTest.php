@@ -23,6 +23,9 @@ class NewsCacheTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // phpunit.xml использует изолированный array-кеш для прочих тестов.
+        // В ЛР №13 тестируем именно реальное хранилище database.
+        config()->set('cache.default', 'database');
         Mail::fake();
         Event::fake([NewArticleEvent::class]);
     }
