@@ -70,6 +70,12 @@ jobs:
           php scripts/setup-local.php
           test -f database/database.sqlite
           test -s LOCAL_LOGIN.txt
+      - name: Smoke test real scheduler and generated daily email
+        run: |
+          php artisan schedule:list
+          php artisan schedule:run
+          php -r '$db = new PDO("sqlite:database/database.sqlite"); $count = (int) $db->query("SELECT COUNT(*) FROM daily_report_deliveries")->fetchColumn(); if ($count < 1) { fwrite(STDERR, "Schedule did not send and record daily email.\\n"); exit(1); }'
+          test -s storage/logs/laravel.log
       - name: Package working Laravel site
         run: |
           mkdir -p /tmp/delivery/Servernaya_10-15_Local
