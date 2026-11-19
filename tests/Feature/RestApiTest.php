@@ -118,8 +118,8 @@ class RestApiTest extends TestCase
         ])->assertCreated()
             ->assertJsonPath('data.role', Role::READER)
             ->assertJsonPath('token_type', 'Bearer')
-            ->assertHeader('Cache-Control', 'no-store')
             ->assertDontSee('password');
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
 
         $token = $response->json('token');
         $this->assertIsString($token);
@@ -197,7 +197,7 @@ class RestApiTest extends TestCase
         Notification::fake();
         $reader = $this->person(Role::READER, 'news-notice-rest@example.test');
         $token = $this->moderatorToken();
-        $this->getJson('/api/articles')->assertOk();
+        $this->get('/news')->assertOk();
         $this->assertNotNull(Cache::get('news.index.version'));
 
         $response = $this->withToken($token)->postJson('/api/articles', $this->articleData())
@@ -228,7 +228,10 @@ class RestApiTest extends TestCase
         $this->getJson('/api/articles-management')->assertOk()
             ->assertJsonFragment(['title' => 'Черновик для REST']);
 
-        $this->getJson('/api/articles/'.$id)->assertNotFound();
+        // Модератор может смотреть черновик (правило Gate::before).
+        $this->getJson('/api/articles/'.$id)->assertOk();
+        // Публичный список при этом черновик не раскрывает.
+        $this->getJson('/api/articles')->assertDontSee('Черновик для REST');
         Notification::assertNothingSent();
         Event::assertNotDispatched(NewArticleEvent::class);
 
@@ -287,10 +290,17 @@ class RestApiTest extends TestCase
         $this->postJson('/api/logout')->assertOk()
             ->assertJsonPath('message', 'Выход выполнен. Текущий токен отозван.');
 
-        $this->getJson('/api/user')->assertUnauthorized();
-
-        $this->withToken($second)->getJson('/api/user')->assertOk();
+        // Убедимся, что доступ аннулирован именно в таблице Sanctum.
         $this->assertSame(1, $user->tokens()->count());
+        $this->assertFalse($user->tokens()->where('token', hash('sha256', explode('|', $first, 2)[1]))->exists());
+
+        // PHP тестовый клиент переиспользует auth guard между запросами.
+        // Обнуляем guard, как при следующем реальном HTTP-запросе Postman.
+        $this->app['auth']->forgetGuards();
+        $this->withToken($first)->getJson('/api/user')->assertUnauthorized();
+
+        $this->app['auth']->forgetGuards();
+        $this->withToken($second)->getJson('/api/user')->assertOk();
     }
 
     public function test_original_blade_site_remains_available_and_api_routes_exist(): void
