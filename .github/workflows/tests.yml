@@ -26,3 +26,36 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: php artisan route:list
+
+  local-ready-zip:
+    if: github.ref == 'refs/heads/main'
+    name: Архив для преподавателя — SQLite + vendor
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo
+          tools: composer:v2
+          coverage: none
+      - name: Install all dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Check automatic setup
+        run: |
+          php scripts/setup-local.php
+          test -f database/database.sqlite
+          test -f LOCAL_LOGIN.txt
+          php artisan route:list
+      - name: Assemble clean ZIP
+        run: |
+          mkdir -p /tmp/laravel-delivery/Kursovaya_10-15_SQLite
+          rsync -a             --exclude='.git/'             --exclude='.github/'             --exclude='.env'             --exclude='LOCAL_LOGIN.txt'             --exclude='database/*.sqlite'             --exclude='storage/logs/*.log'             --exclude='.phpunit.result.cache'             --exclude='bootstrap/cache/*.php'             ./ /tmp/laravel-delivery/Kursovaya_10-15_SQLite/
+          cd /tmp/laravel-delivery
+          zip -qr "$GITHUB_WORKSPACE/Kursovaya_10-15_SQLite_ready.zip" Kursovaya_10-15_SQLite
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kursovaya_10-15_SQLite_готовый_проект
+          path: Kursovaya_10-15_SQLite_ready.zip
+          retention-days: 30
