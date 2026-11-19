@@ -60,6 +60,9 @@ if ($isNew) {
     $env = localSetEnv($env, 'APP_URL', 'http://127.0.0.1:8000');
     $env = localSetEnv($env, 'MAIL_MAILER', 'log');
 }
+ // ЛР №13: обновляем кеш и для существующего .env после №10–12.
+$env = localSetEnv($env, 'CACHE_DRIVER', 'database');
+$env = localSetEnv($env, 'CACHE_STORE', 'database');
 if (localEnvValue($env, 'QUEUE_CONNECTION') !== 'database') {
     stopLocal('В локальной версии ЛР №10 требуется QUEUE_CONNECTION=database.');
 }
