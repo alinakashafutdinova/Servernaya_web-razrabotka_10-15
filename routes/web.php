@@ -50,6 +50,8 @@ Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/account/notifications/read', [AccountController::class, 'readNotifications'])->name('account.notifications.read');
+    Route::post('/account/notifications/{notification}/open', [AccountController::class, 'openArticleNotification'])
+        ->whereUuid('notification')->name('account.notifications.open');
     Route::get('/management', [NewsController::class, 'manage'])->name('news.manage');
     Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
     Route::post('/news', [NewsController::class, 'store'])->name('news.store');
