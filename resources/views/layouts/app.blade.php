@@ -7,6 +7,7 @@
     <meta name="description" content="Курсовой проект · №10–15 по серверной веб-разработке: статьи, авторизация, комментарии и модерация.">
     <title>@yield('title') — Алина Кашафутдинова</title>
     <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=20261119b">
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v=20261119">
     @php
         $broadcastPublic = [
             'enabled' => config('broadcasting.default') === 'pusher',
@@ -61,12 +62,39 @@
                         @can('manage-comments')
                             <a href="{{ route('comments.moderation') }}" class="nav-link {{ request()->routeIs('comments.moderation') ? 'active' : '' }}">Модерация</a>
                         @endcan
-                        <a href="{{ route('account') }}" class="nav-link nav-notifications {{ request()->routeIs('account') ? 'active' : '' }}">
-                            Мой профиль
-                            @if (auth()->user()->unreadNotifications()->count() > 0)
-                                <span class="notice-count" aria-label="Непрочитанных уведомлений: {{ auth()->user()->unreadNotifications()->count() }}">{{ auth()->user()->unreadNotifications()->count() }}</span>
-                            @endif
-                        </a>
+                        @php
+                            $unreadCount = auth()->user()->unreadNotifications()->count();
+                            $unreadItems = auth()->user()->unreadNotifications()->latest()->limit(6)->get();
+                        @endphp
+                        <details class="readers-notifications">
+                            <summary class="nav-link readers-notifications__trigger">
+                                <span aria-hidden="true">♧</span> Уведомления
+                                @if ($unreadCount > 0)
+                                    <span class="notice-count" aria-label="Непрочитанных уведомлений: {{ $unreadCount }}">{{ $unreadCount }}</span>
+                                @endif
+                            </summary>
+                            <div class="readers-notifications__menu" aria-label="Непрочитанные уведомления">
+                                <strong class="readers-notifications__heading">Новые уведомления</strong>
+                                @forelse ($unreadItems as $item)
+                                    @if ($item->type === \App\Notifications\NewArticleNotification::class)
+                                        <form method="post" action="{{ route('account.notifications.open', $item->id) }}" class="readers-notifications__entry">
+                                            @csrf
+                                            <span class="readers-notifications__kind">Новая статья</span>
+                                            <button type="submit" class="readers-notifications__action">{{ $item->data['article_title'] ?? 'Открыть статью' }} ↗</button>
+                                        </form>
+                                    @else
+                                        <a class="readers-notifications__entry" href="{{ route('account') }}">
+                                            <span class="readers-notifications__kind">Проверка комментария</span>
+                                            <strong class="readers-notifications__action">{{ $item->data['article_title'] ?? 'Посмотреть результат' }} ↗</strong>
+                                        </a>
+                                    @endif
+                                @empty
+                                    <p class="readers-notifications__empty">Непрочитанных уведомлений пока нет.</p>
+                                @endforelse
+                                <a class="readers-notifications__all" href="{{ route('account') }}">Все уведомления →</a>
+                            </div>
+                        </details>
+                        <a href="{{ route('account') }}" class="nav-link {{ request()->routeIs('account') ? 'active' : '' }}">Мой профиль</a>
                     @endauth
                 </nav>
             </div>

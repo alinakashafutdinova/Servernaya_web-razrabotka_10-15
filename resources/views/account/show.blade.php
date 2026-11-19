@@ -17,7 +17,7 @@
     <div class="profile-notifications-head">
         <div>
             <h2>Мои <span class="serif-accent">уведомления.</span></h2>
-            <p>Когда модератор примет или отклонит ваш комментарий, здесь появится результат.</p>
+            <p>Здесь сохраняются новые статьи и результаты проверки ваших комментариев.</p>
         </div>
         @if (auth()->user()->unreadNotifications()->exists())
             <form method="post" action="{{ route('account.notifications.read') }}">
@@ -31,19 +31,31 @@
         @forelse ($notifications as $notification)
             <article class="profile-notification {{ $notification->read_at === null ? 'is-unread' : '' }}">
                 <div class="profile-notification-top">
-                    <span class="notification-state {{ ($notification->data['status'] ?? '') === 'approved' ? 'is-approved' : 'is-rejected' }}">
-                        {{ ($notification->data['status'] ?? '') === 'approved' ? '✓ Комментарий опубликован' : 'Комментарий отклонён' }}
-                    </span>
+                    @if ($notification->type === \App\Notifications\NewArticleNotification::class)
+                        <span class="notification-state is-approved">✳ Новая публикация</span>
+                    @else
+                        <span class="notification-state {{ ($notification->data['status'] ?? '') === 'approved' ? 'is-approved' : 'is-rejected' }}">
+                            {{ ($notification->data['status'] ?? '') === 'approved' ? '✓ Комментарий опубликован' : 'Комментарий отклонён' }}
+                        </span>
+                    @endif
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->format('d.m.Y, H:i') }}</time>
                 </div>
                 <h3>{{ $notification->data['article_title'] ?? 'Статья' }}</h3>
-                <p>{{ $notification->data['comment_excerpt'] ?? '' }}</p>
-                @if (($notification->data['status'] ?? '') === 'approved')
-                    <a href="{{ route('news.show', ['article' => $notification->data['article_id']]) }}#comments">Посмотреть комментарий ↗</a>
+                @if ($notification->type === \App\Notifications\NewArticleNotification::class)
+                    <p>{{ $notification->data['message'] ?? 'Появилась новая статья.' }}</p>
+                    <form method="post" action="{{ route('account.notifications.open', $notification->id) }}">
+                        @csrf
+                        <button class="readers-notifications__action" type="submit">Открыть статью ↗</button>
+                    </form>
+                @else
+                    <p>{{ $notification->data['comment_excerpt'] ?? '' }}</p>
+                    @if (($notification->data['status'] ?? '') === 'approved')
+                        <a href="{{ route('news.show', ['article' => $notification->data['article_id']]) }}#comments">Посмотреть комментарий ↗</a>
+                    @endif
                 @endif
             </article>
         @empty
-            <div class="profile-notification-empty">Пока нет уведомлений. После проверки ваших комментариев они появятся здесь.</div>
+            <div class="profile-notification-empty">Пока нет уведомлений. Новости и результаты проверки комментариев появятся здесь.</div>
         @endforelse
     </div>
     {{ $notifications->links('vendor.pagination.pink') }}

@@ -1,0 +1,28 @@
+/* ЛР №12. Выпадающие уведомления в навигации; цвета основной темы. */
+.readers-notifications { position: relative; display: inline-flex; align-items: center; min-width: 0; }
+.readers-notifications__trigger { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 7px; }
+.readers-notifications__trigger::-webkit-details-marker { display: none; }
+.readers-notifications__trigger:focus-visible { outline: 2px solid #b8457f; outline-offset: 4px; }
+.readers-notifications__menu {
+    position: absolute; z-index: 200; top: calc(100% + 13px); right: 0;
+    width: min(360px, calc(100vw - 30px)); max-height: min(470px, 75vh);
+    overflow-y: auto; padding: 18px 16px;
+    background: #fffafd; border: 1px solid #f0cddd;
+    border-radius: 17px; box-shadow: 0 13px 36px rgba(88, 35, 64, .16);
+    color: #31242e;
+}
+.readers-notifications__heading { display: block; font-size: 15px; margin: 0 0 10px; }
+.readers-notifications__entry { display: block; margin: 0; padding: 13px 2px; border: 0; border-bottom: 1px solid #f6e4ec; }
+.readers-notifications__kind { display: block; font-size: 11px; color: #a85b80; margin-bottom: 6px; }
+.readers-notifications__action {
+    display: inline-block; text-align: left; border: 0; padding: 0; margin: 0;
+    background: transparent; color: #992f66; font: inherit; font-size: 14px;
+    font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; cursor: pointer;
+}
+.readers-notifications__action:hover { text-decoration: underline; }
+.readers-notifications__action:focus-visible { outline: 2px solid #b8457f; outline-offset: 3px; }
+.readers-notifications__empty { margin: 12px 0; font-size: 13px; color: #776370; }
+.readers-notifications__all { display: block; font-weight: 750; font-size: 13px; padding-top: 14px; color: #ad3978; }
+@media (max-width: 700px) {
+    .readers-notifications__menu { right: auto; left: 0; }
+}

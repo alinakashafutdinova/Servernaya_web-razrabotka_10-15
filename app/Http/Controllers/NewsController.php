@@ -6,6 +6,10 @@ use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Jobs\VeryLongJob;
 use App\Events\NewArticleEvent;
+use App\Notifications\NewArticleNotification;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -59,6 +63,10 @@ class NewsController extends Controller
         $data['is_published'] = $request->boolean('is_published');
         $article = Article::create($data);
 
+        if ($article->is_published) {
+            $this->notifyReaders($article, $request->user()->id);
+        }
+
         $mailQueued = true;
 
         try {
@@ -107,10 +115,30 @@ class NewsController extends Controller
 
         // Публикация ранее скрытого черновика тоже является новой статьёй для читателя.
         if (! $wasPublished && $article->is_published) {
+            $this->notifyReaders($article, $request->user()->id);
             NewArticleEvent::dispatch($article->id, $article->title);
         }
 
         return redirect()->route('news.manage')->with('status', 'Изменения сохранены.');
+    }
+
+    /**
+     * Все зарегистрированные читатели, кроме автора текущего запроса.
+     * Присутствие читателя на сайте не требуется: запись сохранится в БД.
+     */
+    private function notifyReaders(Article $article, int $authorId): void
+    {
+        $readers = User::query()
+            ->whereHas('role', fn ($query) => $query->where('slug', Role::READER))
+            ->whereKeyNot($authorId)
+            ->get();
+
+        if ($readers->isNotEmpty()) {
+            Notification::send(
+                $readers,
+                new NewArticleNotification($article->id, $article->title)
+            );
+        }
     }
 
     public function destroy(Article $article): RedirectResponse
