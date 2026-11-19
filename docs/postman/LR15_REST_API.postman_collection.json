@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "ЛР15 · Laravel 13 REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Новый API №15 для сайта. Реальные пароли и токены не включены."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "01 · Публичное чтение",
+      "item": [
+        {
+          "name": "GET /api/articles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/articles?page=1",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 JSON\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/articles/{id}",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/articles/{{article_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 · Регистрация и вход",
+      "item": [
+        {
+          "name": "POST /api/register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/register",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Читатель Postman\",\n  \"email\": \"postman.reader@example.test\",\n  \"password\": \"PasswordForPostman2026!\",\n  \"password_confirmation\": \"PasswordForPostman2026!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201\",()=>pm.response.to.have.status(201));",
+                  "if(pm.response.code===201){pm.collectionVariables.set(\"token\",pm.response.json().token);}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{moderator_email}}\",\n  \"password\": \"{{moderator_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));",
+                  "if(pm.response.code===200){pm.collectionVariables.set(\"token\",pm.response.json().token);}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/user",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/user",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · CRUD модератора",
+      "item": [
+        {
+          "name": "GET /api/articles-management",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/articles-management",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/articles",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/articles",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ЛР15: статья через API\",\n  \"summary\": \"Проверяем запросы к серверному приложению через REST API.\",\n  \"content\": \"Текст тестовой публикации для курсового проекта.\",\n  \"published_at\": \"2026-11-20\",\n  \"is_published\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201\",()=>pm.response.to.have.status(201));",
+                  "if(pm.response.code===201){pm.collectionVariables.set(\"article_id\",pm.response.json().data.id);}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/articles/{id}",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/articles/{{article_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Заголовок изменён через PATCH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/articles/{id}",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/articles/{{article_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ЛР15: полное изменение через PUT\",\n  \"summary\": \"Проверяем запросы к серверному приложению через REST API.\",\n  \"content\": \"Текст тестовой публикации для курсового проекта.\",\n  \"published_at\": \"2026-11-20\",\n  \"is_published\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/articles/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/articles/{{article_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"204\",()=>pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · Выход",
+      "item": [
+        {
+          "name": "POST /api/logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/logout",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\",()=>pm.response.to.have.status(200));",
+                  "if(pm.response.code===200){pm.collectionVariables.unset(\"token\");}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "article_id",
+      "value": "1"
+    },
+    {
+      "key": "moderator_email",
+      "value": "moderator@example.test"
+    },
+    {
+      "key": "moderator_password",
+      "value": ""
+    }
+  ]
+}
