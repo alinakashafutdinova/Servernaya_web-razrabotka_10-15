@@ -79,12 +79,12 @@ jobs:
             --exclude='storage/logs/*.log' --exclude='node_modules/' \
             --exclude='.phpunit.result.cache' --exclude='bootstrap/cache/*.php'
           cd /tmp/delivery
-          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_LR11.zip" Servernaya_10-15_Local
-          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_LR11.zip"
+          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_ready.zip" Servernaya_10-15_Local
+          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_SQLite_ready.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: LR11_Local_SQLite_Laravel13_Vue
-          path: Servernaya_10-15_SQLite_LR11.zip
+          name: Kursovaya_10-15_Local_SQLite
+          path: Servernaya_10-15_SQLite_ready.zip
           retention-days: 30
 
   infinityfree-ready-zip:
@@ -120,10 +120,10 @@ jobs:
             --exclude='tests/' --exclude='.phpunit.result.cache' \
             --exclude='bootstrap/cache/*.php'
           cd /tmp/delivery
-          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_LR11.zip" Servernaya_10-15_InfinityFree
-          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_LR11.zip"
+          zip -qr "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_ready.zip" Servernaya_10-15_InfinityFree
+          test -s "$GITHUB_WORKSPACE/Servernaya_10-15_InfinityFree_ready.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: LR11_InfinityFree_MySQL_Laravel13_Vue
-          path: Servernaya_10-15_InfinityFree_LR11.zip
+          name: Kursovaya_10-15_InfinityFree_MySQL
+          path: Servernaya_10-15_InfinityFree_ready.zip
           retention-days: 30
