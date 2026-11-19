@@ -46,7 +46,8 @@ class QueueJobTest extends TestCase
         ])->assertRedirect(route('news.manage'));
 
         $this->assertSame(1, Article::count());
-        $this->assertDatabaseCount('jobs', 1);
+        // Две задачи: письмо №10 и трансляция опубликованной статьи №11.
+        $this->assertDatabaseCount('jobs', 2);
         Mail::assertNothingSent();
 
         $exit = Artisan::call('queue:work', [
@@ -56,6 +57,13 @@ class QueueJobTest extends TestCase
             '--no-interaction' => true,
         ]);
         $this->assertSame(0, $exit);
+        $secondExit = Artisan::call('queue:work', [
+            'connection' => 'database',
+            '--once' => true,
+            '--tries' => 1,
+            '--no-interaction' => true,
+        ]);
+        $this->assertSame(0, $secondExit);
         $this->assertDatabaseCount('jobs', 0);
         Mail::assertSent(ArticleCreatedMail::class, fn ($mail) => $mail->hasTo('teacher@example.test'));
     }
