@@ -19,8 +19,10 @@ class DailyStatisticsMail extends Mailable
 
     public function build(): self
     {
+        $shortDate = \Carbon\CarbonImmutable::createFromFormat('!Y-m-d', $this->reportDate)->format('d.m.Y');
+
         return $this
-            ->subject('Статистика сайта за '.$this->reportDate)
+            ->subject('Статистика · '.$shortDate)
             ->view('emails.daily-statistics');
     }
 }
